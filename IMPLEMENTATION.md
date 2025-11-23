@@ -143,7 +143,9 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
 
    const app = express();
    const PORT = process.env.PORT || 3000;
-   const DB_PATH = process.env.DB_PATH || path.join(__dirname, "..", "..", "data", "db.sqlite");
+   const DB_PATH =
+     process.env.DB_PATH ||
+     path.join(__dirname, "..", "..", "data", "db.sqlite");
 
    let db: Database<sqlite3.Database, sqlite3.Statement>;
 
@@ -274,7 +276,7 @@ services:
     container_name: myapp
     environment:
       - NODE_ENV=production
-      - TZ=Asia/Tashkent
+      - TZ=Australia/Brisbane
       - PORT=3000
       - DB_PATH=/data/db.sqlite
     ports:
@@ -345,6 +347,7 @@ services:
 1. Access sqlite-web at `http://localhost:8081`
 
 2. You can:
+
    - Browse all tables and data
    - Execute SQL queries
    - Add, edit, and delete records
@@ -360,6 +363,7 @@ services:
 ## 🎉 Done!
 
 You now have a fully TypeScript-based self-hosted application with:
+
 - **Frontend**: Vite + React + TypeScript
 - **Backend**: Express + TypeScript + SQLite
 - **Database GUI**: sqlite-web for easy database management

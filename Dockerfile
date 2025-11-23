@@ -14,6 +14,9 @@ FROM node:20-alpine AS backend-build
 
 WORKDIR /app/backend
 
+# Install build dependencies for native modules (sqlite3)
+RUN apk add --no-cache python3 make g++
+
 COPY backend/package.json backend/yarn.lock ./
 RUN yarn install --frozen-lockfile
 

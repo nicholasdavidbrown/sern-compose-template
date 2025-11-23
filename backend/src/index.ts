@@ -42,7 +42,7 @@ app.post("/api/users", async (req, res) => {
 
 // Serve static files in production only
 if (process.env.NODE_ENV === "production") {
-  const staticPath = path.join(__dirname, "..", "frontend_dist");
+  const staticPath = path.join(__dirname, "..", "..", "frontend_dist");
   app.use(express.static(staticPath));
 
   // Catch-all route for SPA - serves index.html for all non-API routes
