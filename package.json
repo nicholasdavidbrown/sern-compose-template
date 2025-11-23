@@ -1,0 +1,21 @@
+{
+  "name": "sern-compose-template",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack template with Docker Compose",
+  "scripts": {
+    "up": "docker compose up",
+    "up-build": "docker compose up --build",
+    "down": "docker compose down",
+    "clean": "docker compose down -v && docker system prune -f",
+    "rebuild": "docker compose down && docker compose build --no-cache && docker compose up",
+    "logs": "docker compose logs -f",
+    "restart": "docker compose restart",
+    "dev-frontend": "cd frontend && yarn dev",
+    "dev-backend": "cd backend && yarn dev"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
