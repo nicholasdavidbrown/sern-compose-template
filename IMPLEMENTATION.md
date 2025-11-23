@@ -1,10 +1,10 @@
-Below is the **revised set of step-by-step markdown instructions**, written for an AI agent that is **already positioned in the root working directory** (the future `my-app` directory). All paths assume the agent is operating from this root.
+Below is the **revised set of step-by-step markdown instructions**, written for an AI agent that is **already positioned in the root working directory**. All paths assume the agent is operating from this root.
 
 ---
 
 # 📘 Instructions for AI Agent
 
-### Build a Self-Hosted App (Vite React + Express + SQLite + Docker Compose)
+### Build a Self-Hosted App (Vite React TypeScript + Express TypeScript + SQLite + Docker Compose)
 
 **Assume you are already in the root project directory.**
 
@@ -28,7 +28,7 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
 
 ---
 
-## ✅ 2. Set Up the Frontend (Vite + React)
+## ✅ 2. Set Up the Frontend (Vite + React + TypeScript)
 
 1. Navigate to the frontend directory:
 
@@ -36,16 +36,16 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
    cd frontend
    ```
 
-2. Create a new Vite React project **inside the current folder**:
+2. Create a new Vite React TypeScript project **inside the current folder**:
 
    ```bash
-   npm create vite@latest . -- --template react
+   npm create vite@latest . -- --template react-ts
    ```
 
-3. Install dependencies:
+3. Install dependencies using yarn:
 
    ```bash
-   npm install
+   yarn install
    ```
 
 4. Confirm that the `package.json` contains a build script:
@@ -53,7 +53,7 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
    ```json
    "scripts": {
      "dev": "vite",
-     "build": "vite build",
+     "build": "tsc -b && vite build",
      "preview": "vite preview"
    }
    ```
@@ -66,7 +66,7 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
 
 ---
 
-## ✅ 3. Set Up the Backend (Express + SQLite)
+## ✅ 3. Set Up the Backend (Express + SQLite + TypeScript)
 
 1. Navigate to backend directory:
 
@@ -80,34 +80,63 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
    npm init -y
    ```
 
-3. Install dependencies:
+3. Install runtime dependencies:
 
    ```bash
-   npm install express sqlite3 sqlite
+   yarn add express sqlite3 sqlite
    ```
 
-4. Add a start script in `backend/package.json`:
+4. Install TypeScript and development dependencies:
+
+   ```bash
+   yarn add -D typescript @types/node @types/express tsx
+   ```
+
+5. Create `backend/tsconfig.json`:
 
    ```json
-   "scripts": {
-     "start": "node src/index.js"
+   {
+     "compilerOptions": {
+       "target": "ES2022",
+       "module": "NodeNext",
+       "moduleResolution": "NodeNext",
+       "outDir": "./dist",
+       "rootDir": "./src",
+       "strict": true,
+       "esModuleInterop": true,
+       "skipLibCheck": true,
+       "forceConsistentCasingInFileNames": true,
+       "resolveJsonModule": true,
+       "declaration": true,
+       "declarationMap": true,
+       "sourceMap": true
+     },
+     "include": ["src/**/*"],
+     "exclude": ["node_modules", "dist"]
    }
    ```
 
-5. Add the module type:
+6. Update `backend/package.json` to add scripts and module type:
 
    ```json
-   "type": "module"
+   {
+     "type": "module",
+     "scripts": {
+       "build": "tsc",
+       "dev": "tsx src/index.ts",
+       "start": "node dist/index.js"
+     }
+   }
    ```
 
-6. Create `backend/src/index.js` with the following contents:
+7. Create `backend/src/index.ts` with the following contents:
 
-   ```js
+   ```typescript
    import express from "express";
    import path from "path";
    import { fileURLToPath } from "url";
    import sqlite3 from "sqlite3";
-   import { open } from "sqlite";
+   import { open, Database } from "sqlite";
 
    const __filename = fileURLToPath(import.meta.url);
    const __dirname = path.dirname(__filename);
@@ -116,7 +145,7 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
    const PORT = process.env.PORT || 3000;
    const DB_PATH = process.env.DB_PATH || "/data/db.sqlite";
 
-   let db;
+   let db: Database<sqlite3.Database, sqlite3.Statement>;
 
    async function initDb() {
      db = await open({
@@ -159,7 +188,13 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
    });
    ```
 
-7. Return to root directory:
+8. Test the TypeScript compilation:
+
+   ```bash
+   yarn build
+   ```
+
+9. Return to root directory:
 
    ```bash
    cd ..
@@ -167,7 +202,7 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
 
 ---
 
-## ✅ 4. Create the Dockerfile (Multi-Stage Build)
+## ✅ 4. Create the Dockerfile (Multi-Stage Build with TypeScript)
 
 In the root directory, create a file named `Dockerfile` containing:
 
@@ -177,21 +212,22 @@ FROM node:20-alpine AS frontend-build
 
 WORKDIR /app/frontend
 
-COPY frontend/package*.json ./
-RUN npm ci
+COPY frontend/package.json frontend/yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 COPY frontend/ ./
-RUN npm run build
+RUN yarn build
 
 # ---- Backend build stage ----
 FROM node:20-alpine AS backend-build
 
 WORKDIR /app/backend
 
-COPY backend/package*.json ./
-RUN npm ci --only=production
+COPY backend/package.json backend/yarn.lock ./
+RUN yarn install --frozen-lockfile
 
 COPY backend/ ./
+RUN yarn build
 
 # ---- Final runtime image ----
 FROM node:20-alpine
@@ -200,7 +236,12 @@ WORKDIR /app
 
 RUN mkdir -p /data
 
-COPY --from=backend-build /app/backend /app/backend
+# Copy compiled backend and its dependencies
+COPY --from=backend-build /app/backend/dist /app/backend/dist
+COPY --from=backend-build /app/backend/node_modules /app/backend/node_modules
+COPY --from=backend-build /app/backend/package.json /app/backend/package.json
+
+# Copy compiled frontend
 COPY --from=frontend-build /app/frontend/dist /app/frontend_dist
 
 ENV NODE_ENV=production
@@ -211,7 +252,7 @@ WORKDIR /app/backend
 
 EXPOSE 3000
 
-CMD ["node", "src/index.js"]
+CMD ["node", "dist/index.js"]
 ```
 
 ---
@@ -237,6 +278,18 @@ services:
     volumes:
       - ./data:/data
     restart: unless-stopped
+
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: sqlite-web
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      - SQLITE_DATABASE=db.sqlite
+    command: ["/data/db.sqlite"]
+    restart: unless-stopped
 ```
 
 ---
@@ -249,16 +302,18 @@ services:
    docker compose up -d --build
    ```
 
-2. Access the app:
+2. Access the services:
 
    ```
-   http://localhost:8080
+   Main App:    http://localhost:8080
+   SQLite GUI:  http://localhost:8081
    ```
 
 3. To view logs:
 
    ```bash
    docker compose logs -f myapp
+   docker compose logs -f sqlite-web
    ```
 
 4. To stop the app:
@@ -281,6 +336,30 @@ services:
 
 ---
 
+## ✅ 8. Using the SQLite GUI
+
+1. Access sqlite-web at `http://localhost:8081`
+
+2. You can:
+   - Browse all tables and data
+   - Execute SQL queries
+   - Add, edit, and delete records
+   - Export data as JSON or CSV
+   - View table schemas
+
+3. The GUI connects to the same database as your application (`./data/db.sqlite`)
+
+4. Changes made in the GUI are immediately visible in your app and vice versa
+
+---
+
 ## 🎉 Done!
 
-These instructions are now fully aligned for an AI agent operating **from the root project directory** with clear, deterministic step-by-step actions.
+You now have a fully TypeScript-based self-hosted application with:
+- **Frontend**: Vite + React + TypeScript
+- **Backend**: Express + TypeScript + SQLite
+- **Database GUI**: sqlite-web for easy database management
+- **Docker**: Multi-stage builds with TypeScript compilation
+- **Persistence**: SQLite database persisted in `./data/`
+
+All instructions are aligned for an AI agent operating **from the root project directory** with clear, deterministic step-by-step actions.

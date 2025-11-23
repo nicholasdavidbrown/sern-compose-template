@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  myapp:
+    build: .
+    container_name: myapp
+    environment:
+      - NODE_ENV=production
+      - TZ=Asia/Tashkent
+      - PORT=3000
+      - DB_PATH=/data/db.sqlite
+    ports:
+      - "8080:3000"
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: sqlite-web
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      - SQLITE_DATABASE=db.sqlite
+    command: ["/data/db.sqlite"]
+    restart: unless-stopped
