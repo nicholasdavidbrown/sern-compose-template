@@ -1,56 +1,56 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
 interface User {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 function App() {
-  const [users, setUsers] = useState<User[]>([])
-  const [showModal, setShowModal] = useState(false)
-  const [newUserName, setNewUserName] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [users, setUsers] = useState<User[]>([]);
+  const [showModal, setShowModal] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const API_BASE = ''
+  const API_BASE = "";
 
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    fetchUsers();
+  }, []);
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/users`)
-      const data = await response.json()
-      setUsers(data)
+      const response = await fetch(`${API_BASE}/api/users`);
+      const data = await response.json();
+      setUsers(data);
     } catch (error) {
-      console.error('Failed to fetch users:', error)
+      console.error("Failed to fetch users:", error);
     }
-  }
+  };
 
   const createUser = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newUserName.trim()) return
+    e.preventDefault();
+    if (!newUserName.trim()) return;
 
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch(`${API_BASE}/api/users`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newUserName }),
-      })
-      const newUser = await response.json()
-      setUsers([...users, newUser])
-      setNewUserName('')
-      setShowModal(false)
+      });
+      const newUser = await response.json();
+      setUsers([...users, newUser]);
+      setNewUserName("");
+      setShowModal(false);
     } catch (error) {
-      console.error('Failed to create user:', error)
+      console.error("Failed to create user:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -62,17 +62,18 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>SERN Compose Starter</h1>
+      <p>with Vite React, Node Express and Sqlite3</p>
 
       <div className="card">
         <h2>User Management</h2>
-        <button onClick={() => setShowModal(true)}>
-          Create New User
-        </button>
+        <button onClick={() => setShowModal(true)}>Create New User</button>
 
         <div className="users-list">
           {users.length === 0 ? (
-            <p className="read-the-docs">No users yet. Create one to get started!</p>
+            <p className="read-the-docs">
+              No users yet. Create one to get started!
+            </p>
           ) : (
             <ul>
               {users.map((user) => (
@@ -83,6 +84,35 @@ function App() {
               ))}
             </ul>
           )}
+        </div>
+      </div>
+
+      <div className="info-section">
+        <div className="info-card">
+          <h3>API Endpoints</h3>
+          <div className="endpoint">
+            <code className="method get">GET</code>
+            <code className="path">/api/users</code>
+            <span className="description">Fetch all users</span>
+          </div>
+          <div className="endpoint">
+            <code className="method post">POST</code>
+            <code className="path">/api/users</code>
+            <span className="description">Create a new user</span>
+          </div>
+        </div>
+
+        <div className="info-card">
+          <h3>Database Viewer</h3>
+          <p>View and query the SQLite database directly:</p>
+          <a
+            href="http://localhost:8081"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="db-link"
+          >
+            Open SQLite Web Viewer
+          </a>
         </div>
       </div>
 
@@ -100,7 +130,7 @@ function App() {
               />
               <div className="modal-buttons">
                 <button type="submit" disabled={loading}>
-                  {loading ? 'Creating...' : 'Create'}
+                  {loading ? "Creating..." : "Create"}
                 </button>
                 <button type="button" onClick={() => setShowModal(false)}>
                   Cancel
@@ -111,11 +141,9 @@ function App() {
         </div>
       )}
 
-      <p className="read-the-docs">
-        Frontend connected to backend API
-      </p>
+      <p className="read-the-docs">Frontend connected to backend API</p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

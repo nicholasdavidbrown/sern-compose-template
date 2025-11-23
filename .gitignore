@@ -19,3 +19,6 @@ data/
 
 # OS files
 Thumbs.db
+
+# Node modules
+*node_modules
