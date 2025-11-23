@@ -143,7 +143,7 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
 
    const app = express();
    const PORT = process.env.PORT || 3000;
-   const DB_PATH = process.env.DB_PATH || "/data/db.sqlite";
+   const DB_PATH = process.env.DB_PATH || path.join(__dirname, "..", "..", "data", "db.sqlite");
 
    let db: Database<sqlite3.Database, sqlite3.Statement>;
 
@@ -174,12 +174,16 @@ Below is the **revised set of step-by-step markdown instructions**, written for 
      res.json({ id: result.lastID, name });
    });
 
-   const staticPath = path.join(__dirname, "..", "frontend_dist");
-   app.use(express.static(staticPath));
+   // Serve static files in production only
+   if (process.env.NODE_ENV === "production") {
+     const staticPath = path.join(__dirname, "..", "frontend_dist");
+     app.use(express.static(staticPath));
 
-   app.get("*", (_req, res) => {
-     res.sendFile(path.join(staticPath, "index.html"));
-   });
+     // Catch-all route for SPA - serves index.html for all non-API routes
+     app.use((_req, res) => {
+       res.sendFile(path.join(staticPath, "index.html"));
+     });
+   }
 
    initDb().then(() => {
      app.listen(PORT, () => {
