@@ -45,17 +45,32 @@ A full-stack web application template using SQLite, Express, React, and Node.js 
 
 ```
 
+## Requirements
+
+### For Docker Deployment (Recommended)
+- **Docker**: 20.10+ or later
+- **Docker Compose**: 2.0+ or later (v2 CLI)
+
+### For Local Development
+- **Node.js**: 20.x or later
+- **Yarn**: 4.x (Berry) via Corepack
+  - Enable with: `corepack enable`
+  - Corepack comes bundled with Node.js 16.10+
+- **Git**: Any recent version
+
+### Optional Tools
+- **SQLite CLI**: For manual database inspection (not required - sqlite-web provides a UI)
+
 ## Quick Start
 
 ### Prerequisites
-- Docker and Docker Compose installed
-- Node.js 20+ and Yarn (for local development)
+Ensure you have the required versions listed in the Requirements section above.
 
 ### Production (Docker)
 
 1. **Start the application:**
    ```bash
-   yarn up-build
+   docker compose up --build
    ```
 
 2. **Access the services:**
@@ -64,22 +79,27 @@ A full-stack web application template using SQLite, Express, React, and Node.js 
 
 3. **Stop the application:**
    ```bash
-   yarn down
+   docker compose down
    ```
 
 ### Local Development
 
-1. **Install dependencies:**
+1. **Enable Yarn 4 (first time setup):**
+   ```bash
+   corepack enable
+   ```
+
+2. **Install dependencies:**
    ```bash
    yarn install
    ```
 
-2. **Start backend (Terminal 1):**
+3. **Start backend (Terminal 1):**
    ```bash
    yarn dev-backend
    ```
 
-3. **Start frontend (Terminal 2):**
+4. **Start frontend (Terminal 2):**
    ```bash
    yarn dev-frontend
    ```
@@ -92,15 +112,15 @@ A full-stack web application template using SQLite, Express, React, and Node.js 
 
 ### Docker Commands
 
-| Command | Description |
-|---------|-------------|
-| `yarn up` | Start containers with existing images |
-| `yarn up-build` | Start containers and rebuild if needed |
-| `yarn down` | Stop and remove containers |
-| `yarn clean` | Remove containers, volumes, and clean Docker system |
-| `yarn rebuild` | Full clean rebuild (no cache) |
-| `yarn logs` | Follow container logs in real-time |
-| `yarn restart` | Restart all containers |
+| Command | Shorthand | Description |
+|---------|-----------|-------------|
+| `docker compose up` | `yarn up` | Start containers with existing images |
+| `docker compose up --build` | `yarn up-build` | Start containers and rebuild if needed |
+| `docker compose down` | `yarn down` | Stop and remove containers |
+| `docker compose down -v && docker system prune -f` | `yarn clean` | Remove containers, volumes, and clean Docker system |
+| `docker compose down && docker compose build --no-cache && docker compose up` | `yarn rebuild` | Full clean rebuild (no cache) |
+| `docker compose logs -f` | `yarn logs` | Follow container logs in real-time |
+| `docker compose restart` | `yarn restart` | Restart all containers |
 
 ### Development Commands
 
@@ -178,15 +198,15 @@ Content-Type: application/json
 1. **Frontend changes:**
    - Edit files in `frontend/src/`
    - Changes are reflected immediately with HMR in dev mode
-   - For Docker: `yarn up-build`
+   - For Docker: `docker compose up --build`
 
 2. **Backend changes:**
    - Edit files in `backend/src/`
-   - For Docker: `yarn up-build`
+   - For Docker: `docker compose up --build`
 
 3. **Dependency changes:**
    - Update package.json in respective folder
-   - Run `yarn rebuild` for clean Docker build
+   - Run `docker compose down && docker compose build --no-cache && docker compose up` for clean Docker build
 
 ### Viewing the Database
 
@@ -233,7 +253,7 @@ This project is designed to work seamlessly across different CPU architectures:
 
 Simply run on any supported platform:
 ```bash
-yarn up-build
+docker compose up --build
 ```
 
 Docker will automatically:
@@ -256,14 +276,14 @@ If ports 8080 or 8081 are in use, either:
 
 ### Database locked
 If you get "database is locked" errors:
-- Stop all containers: `yarn down`
-- Remove volumes: `yarn clean`
-- Restart: `yarn up-build`
+- Stop all containers: `docker compose down`
+- Remove volumes: `docker compose down -v && docker system prune -f`
+- Restart: `docker compose up --build`
 
 ### Clean rebuild needed
 If you encounter issues after dependency changes:
 ```bash
-yarn rebuild
+docker compose down && docker compose build --no-cache && docker compose up
 ```
 
 This performs a complete rebuild without cache.
