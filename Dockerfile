@@ -3,8 +3,13 @@ FROM node:20-alpine AS frontend-build
 
 WORKDIR /app/frontend
 
-COPY frontend/package.json frontend/yarn.lock ./
-RUN yarn install --frozen-lockfile
+# Enable corepack to use Yarn 4
+RUN corepack enable
+
+COPY frontend/package.json frontend/yarn.lock frontend/.yarnrc.yml* ./
+COPY .yarnrc.yml* ./
+
+RUN yarn install
 
 COPY frontend/ ./
 RUN yarn build
@@ -14,11 +19,20 @@ FROM node:20-alpine AS backend-build
 
 WORKDIR /app/backend
 
-# Install build dependencies for native modules (sqlite3)
-RUN apk add --no-cache python3 make g++
+# Enable corepack to use Yarn 4
+RUN corepack enable
 
-COPY backend/package.json backend/yarn.lock ./
-RUN yarn install --frozen-lockfile
+# Install build dependencies for native modules (sqlite3)
+RUN apk add --no-cache python3 make g++ py3-setuptools
+
+COPY backend/package.json backend/yarn.lock backend/.yarnrc.yml* ./
+COPY .yarnrc.yml* ../
+
+# Install dependencies - this will build native modules for Linux
+RUN yarn install
+
+# Force rebuild sqlite3 for the correct architecture
+RUN cd /app/backend/node_modules/sqlite3 && npm run install --build-from-source
 
 COPY backend/ ./
 RUN yarn build
