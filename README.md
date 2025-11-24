@@ -208,10 +208,44 @@ CREATE TABLE users (
 - Full-stack TypeScript support
 - Hot Module Replacement (HMR) in development
 - Multi-stage Docker builds for optimized production images
+- **Multi-architecture support** (AMD64, ARM64, x86)
 - Persistent SQLite database with web viewer
 - Dark/Light mode support in UI
 - RESTful API design
 - Containerized development and production environments
+
+## Multi-Architecture Support
+
+This project is designed to work seamlessly across different CPU architectures:
+
+- **AMD64/x86_64** - Intel/AMD processors (most common)
+- **ARM64/aarch64** - Apple Silicon (M1/M2/M3), AWS Graviton, Raspberry Pi 4+
+- **x86** - Older 32-bit systems (via emulation)
+
+### How it Works
+
+1. **Base Images**: Uses official `node:20-alpine` multi-arch images
+2. **Native Compilation**: sqlite3 module is compiled from source during build for the target architecture
+3. **Platform Detection**: Docker automatically detects your system architecture and builds accordingly
+4. **Cross-Platform Compatible**: The same `docker-compose.yml` works on all architectures
+
+### No Special Configuration Needed
+
+Simply run on any supported platform:
+```bash
+yarn up-build
+```
+
+Docker will automatically:
+- Pull the correct base images for your architecture
+- Compile native dependencies (sqlite3) for your platform
+- Build an optimized container that runs natively
+
+### Notes
+
+- **sqlite-web**: Uses linux/amd64 with emulation on ARM (slight performance impact, but works fine)
+- **Performance**: Native builds provide best performance on all platforms
+- **Apple Silicon**: Fully supported - no Rosetta needed for the main app
 
 ## Troubleshooting
 

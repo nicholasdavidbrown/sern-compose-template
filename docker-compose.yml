@@ -1,8 +1,7 @@
-version: "3.8"
-
 services:
   myapp:
-    build: .
+    build:
+      context: .
     container_name: myapp
     environment:
       - NODE_ENV=production
@@ -17,6 +16,7 @@ services:
 
   sqlite-web:
     image: coleifer/sqlite-web
+    platform: linux/amd64  # Use amd64 with emulation if needed - sqlite-web doesn't have arm64 builds
     container_name: sqlite-web
     ports:
       - "8081:8081"
