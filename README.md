@@ -1,6 +1,6 @@
-# SERN Compose Template
+# SERN Lite Compose Template
 
-A full-stack web application template using SQLite, Express, React, and Node.js with Docker Compose for easy deployment.
+A full-stack web application template using SQLite, Express, React, and Node.js with Docker Compose for easy deployment. This template is designed for small-scale self-hosted projects and such uses SQLite.
 
 ## Tech Stack
 
